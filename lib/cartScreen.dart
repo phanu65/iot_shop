@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:account/provider/iotDeviceProvider.dart';
 import 'package:account/model/iotDevice.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:account/provider/orderHistoryProvider.dart';
 
 class CartScreen extends StatelessWidget {
@@ -12,39 +12,59 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ตะกร้าสินค้า'),
+        backgroundColor: const Color(0xFF4D55CC),
+        title: Text('ตะกร้าสินค้า', style: GoogleFonts.prompt(color: Colors.white, fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: Consumer<IoTDeviceProvider>(
         builder: (context, provider, child) {
           if (provider.cart.isEmpty) {
-            return const Center(
-              child:
-                  Text('ไม่มีสินค้าในตะกร้า', style: TextStyle(fontSize: 18)),
+            return Center(
+              child: Text(
+                'ไม่มีสินค้าในตะกร้า',
+                style: GoogleFonts.prompt(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF7A73D1)),
+              ),
             );
           }
           return Column(
             children: [
               Expanded(
                 child: ListView.builder(
+                  padding: const EdgeInsets.all(10),
                   itemCount: provider.cart.length,
                   itemBuilder: (context, index) {
                     IoTDevice item = provider.cart[index];
-                    return ListTile(
-                      title: Text(item.name),
-                      subtitle: Text(
-                          'ราคา: ฿${item.price.toStringAsFixed(2)} x ${item.quantity}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: () => provider.decreaseQuantity(item),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () => provider.increaseQuantity(item),
-                          ),
-                        ],
+                    return Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 5,
+                      color: Color(0xFFB5A8D5),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(10),
+                        title: Text(
+                          item.name,
+                          style: GoogleFonts.prompt(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          '฿${item.price.toStringAsFixed(2)} x ${item.quantity}',
+                          style: GoogleFonts.prompt(fontSize: 16, color: Colors.white),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove, color: Colors.white),
+                              onPressed: () => provider.decreaseQuantity(item),
+                            ),
+                            Text(
+                              '${item.quantity}',
+                              style: GoogleFonts.prompt(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              onPressed: () => provider.increaseQuantity(item),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -56,13 +76,17 @@ class CartScreen extends StatelessWidget {
                   children: [
                     Text(
                       'ยอดรวม: ฿${provider.getTotalPrice().toStringAsFixed(2)}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.prompt(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF211C84)),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () => _showPaymentDialog(context, provider),
-                      child: const Text('ยืนยันการสั่งซื้อ'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF211C84),
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('ยืนยันการสั่งซื้อ', style: GoogleFonts.prompt(fontSize: 18, color: Colors.white)),
                     ),
                   ],
                 ),
@@ -79,21 +103,20 @@ class CartScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('การชำระเงิน'),
+          title: Text('การชำระเงิน', style: GoogleFonts.prompt(fontWeight: FontWeight.bold, color: Color(0xFF211C84))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('กรุณาชำระเงินโดยสแกน QR Code ด้านล่าง'),
+              Text('กรุณาชำระเงินโดยสแกน QR Code ด้านล่าง', style: GoogleFonts.prompt()),
+              const SizedBox(height: 10),
+              Image.asset('assets/qr_code_example.jpg', width: 200, height: 200),
               const SizedBox(height: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('โอนเงินเข้าบัญชีธนาคาร'),
-                  const SizedBox(height: 10),
-                  const Text('🏦 ธนาคาร: กรุงเทพ'),
-                  const Text('📌 หมายเลขบัญชี: 123-456-7890'),
-                  Text(
-                      '💰 จำนวนเงิน: ฿${provider.getTotalPrice().toStringAsFixed(2)}'),
+                  Text('🏦 ธนาคาร: กรุงเทพ', style: GoogleFonts.prompt()),
+                  Text('📌 หมายเลขบัญชี: 123-456-7890', style: GoogleFonts.prompt()),
+                  Text('💰 จำนวนเงิน: ฿${provider.getTotalPrice().toStringAsFixed(2)}', style: GoogleFonts.prompt(fontWeight: FontWeight.bold, color: Colors.red)),
                 ],
               ),
             ],
@@ -101,32 +124,19 @@ class CartScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('ยกเลิก'),
+              child: Text('ยกเลิก', style: GoogleFonts.prompt(color: Colors.grey)),
             ),
-            Consumer<OrderHistoryProvider>(
-              builder: (context, orderProvider, child) {
-                return ElevatedButton(
-                  onPressed: () {
-                    // ลดจำนวนสินค้าตามที่ซื้อ
-                    for (var item in provider.cart) {
-                      item.quantity -= item.quantity;
-                      provider.updateDevice(item);
-                    }
-
-                    // บันทึกคำสั่งซื้อ
-                    orderProvider.addOrder(provider.cart);
-                    provider.checkout();
-                    Navigator.pop(context);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'ชำระเงินสำเร็จ! รายการถูกบันทึก และจำนวนสินค้าลดลง')),
-                    );
-                  },
-                  child: const Text('ยืนยันการชำระเงิน'),
+            ElevatedButton(
+              onPressed: () {
+                Provider.of<OrderHistoryProvider>(context, listen: false).addOrder(provider.cart);
+                provider.checkout();
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('ชำระเงินสำเร็จ! รายการถูกบันทึก', style: GoogleFonts.prompt())),
                 );
               },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: Text('ยืนยันการชำระเงิน', style: GoogleFonts.prompt(color: Colors.white)),
             ),
           ],
         );

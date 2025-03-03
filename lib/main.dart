@@ -1,12 +1,12 @@
+import 'package:account/ProductDetailScreen.dart';
+import 'package:account/addIoTDeviceScreen.dart';
+import 'package:account/cartScreen.dart';
+import 'package:account/orderHistoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'editIoTDeviceScreen.dart';
-import 'addIoTDeviceScreen.dart';
-import 'cartScreen.dart';
-import 'orderHistoryScreen.dart';
-import 'package:account/model/iotDevice.dart';
 import 'package:account/provider/iotDeviceProvider.dart';
+import 'package:account/model/iotDevice.dart';
 import 'package:account/provider/orderHistoryProvider.dart';
 
 void main() async {
@@ -103,83 +103,53 @@ class _MyHomePageState extends State<MyHomePage> {
           return GridView.builder(
             padding: const EdgeInsets.all(10),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // แสดง 2 คอลัมน์
+              crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 0.8, // ปรับอัตราส่วนให้เหมาะสม
+              childAspectRatio: 0.8,
             ),
             itemCount: provider.devices.length,
             itemBuilder: (context, index) {
               IoTDevice data = provider.devices[index];
-              return Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                color: Color(0xFFB5A8D5),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: data.imagePath != null && data.imagePath!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                              child: Image.asset(data.imagePath!, width: double.infinity, fit: BoxFit.cover),
-                            )
-                          : const Icon(Icons.devices, size: 70, color: Colors.grey),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailScreen(device: data),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(data.name, style: GoogleFonts.prompt(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                          Text('฿${data.price.toStringAsFixed(2)}', style: GoogleFonts.prompt(fontSize: 16, color: Colors.white)),
-                          Text('จำนวน: ${data.quantity} ชิ้น', style: GoogleFonts.prompt(fontSize: 14, color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart, color: Colors.green, size: 30),
-                        onPressed: () {
-                        if (data.quantity > 0) {
-                          Provider.of<IoTDeviceProvider>(context, listen: false).addToCart(data);
-                          data.quantity -= 1;
-                          provider.updateDevice(data);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('เพิ่มลงตะกร้าแล้ว!', style: GoogleFonts.prompt())),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('⚠️ สินค้า ${data.name} หมดแล้ว!', style: GoogleFonts.prompt())),
-                          );
-                        }
-                        },
-                      ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue, size: 30),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditIoTDeviceScreen(device: data),
-                              ),
-                            );
-                          },
+                  );
+                },
+                child: Card(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  color: Color(0xFFB5A8D5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                          child: Image.asset(
+                            data.imagePath ?? 'assets/placeholder.png',
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red, size: 30),
-                          onPressed: () {
-                            provider.deleteDevice(data);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('ลบอุปกรณ์แล้ว!', style: GoogleFonts.prompt())),
-                            );
-                          },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(data.name, style: GoogleFonts.prompt(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text('฿${data.price.toStringAsFixed(2)}', style: GoogleFonts.prompt(fontSize: 16, color: Colors.white)),
+                            Text('จำนวน: ${data.quantity} ชิ้น', style: GoogleFonts.prompt(fontSize: 14, color: Colors.white)),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

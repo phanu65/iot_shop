@@ -42,6 +42,7 @@ dependencies:
   google_fonts: ^6.2.1
   intl: ^0.20.2
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -61,7 +62,7 @@ flutter:
   assets:
     - assets/qr_code_example.jpg
     - assets/images/
-    
+ 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

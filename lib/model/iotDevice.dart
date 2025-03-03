@@ -4,6 +4,7 @@ class IoTDevice {
   double price;
   DateTime? date;
   int quantity;
+  String? description;
   String? category;
   String? imagePath;
 
@@ -13,6 +14,7 @@ class IoTDevice {
     required this.price,
     this.date,
     this.quantity = 1,
+    this.description,
     this.category,
     this.imagePath,
   });
@@ -24,7 +26,7 @@ class IoTDevice {
     DateTime? date,
     int? quantity,
     String? category,
-    String? imagePath,
+    String? imagePath, String? description,
   }) {
     return IoTDevice(
       keyID: keyID ?? this.keyID,

@@ -22,38 +22,40 @@ class IoTDeviceProvider with ChangeNotifier {
   }
 
   // ลบอุปกรณ์
-Future<void> deleteDevice(IoTDevice device) async {
-  var db = IoTDeviceDB(dbName: 'iot_devices.db');
-  db.deleteData(device);
+  Future<void> deleteDevice(IoTDevice device) async {
+    var db = IoTDeviceDB(dbName: 'iot_devices.db');
+    db.deleteData(device);
 
-  // ลบอุปกรณ์จากรายการ devices โดยไม่ต้องโหลดข้อมูลใหม่ทั้งหมด
-  devices.removeWhere((item) => item.keyID == device.keyID);
+    devices.removeWhere((item) => item.keyID == device.keyID);
+    cart.removeWhere((item) => item.keyID == device.keyID);
 
-  // ลบอุปกรณ์จากตะกร้าสินค้า (ถ้ามี)
-  cart.removeWhere((item) => item.keyID == device.keyID);
-
-  notifyListeners();
-}
-
-// อัปเดตข้อมูลอุปกรณ์
-Future<void> updateDevice(IoTDevice device) async {
-  var db = IoTDeviceDB(dbName: 'iot_devices.db');
-  db.updateData(device);
-
-  // อัปเดตข้อมูลอุปกรณ์ในรายการ devices โดยไม่ต้องโหลดข้อมูลใหม่ทั้งหมด
-  int index = devices.indexWhere((item) => item.keyID == device.keyID);
-  if (index != -1) {
-    devices[index] = device;
+    notifyListeners();
   }
 
-  // อัปเดตข้อมูลอุปกรณ์ในตะกร้าสินค้า (ถ้ามี)
-  int cartIndex = cart.indexWhere((item) => item.keyID == device.keyID);
-  if (cartIndex != -1) {
-    cart[cartIndex] = device.copyWith(quantity: cart[cartIndex].quantity);
+  // ลดจำนวนสินค้าในคลัง (Stock) และอัปเดตฐานข้อมูล
+  Future<void> decreaseStockQuantity(int keyID) async {
+    var db = IoTDeviceDB(dbName: 'iot_devices.db');
+    int index = devices.indexWhere((device) => device.keyID == keyID);
+
+    if (index != -1 && devices[index].quantity > 0) {
+      devices[index] = devices[index].copyWith(quantity: devices[index].quantity - 1);
+       db.updateData(devices[index]); // อัปเดตฐานข้อมูล
+      notifyListeners();
+    }
   }
 
-  notifyListeners();
-}
+  // อัปเดตข้อมูลอุปกรณ์
+  Future<void> updateDevice(IoTDevice device) async {
+    var db = IoTDeviceDB(dbName: 'iot_devices.db');
+    db.updateData(device);
+
+    int index = devices.indexWhere((item) => item.keyID == device.keyID);
+    if (index != -1) {
+      devices[index] = device.copyWith(name: device.name);
+    }
+
+    notifyListeners();
+  }
 
   // ค้นหาอุปกรณ์โดย ID
   IoTDevice? getDeviceById(int id) {
@@ -69,20 +71,17 @@ Future<void> updateDevice(IoTDevice device) async {
   }
 
   // ค้นหาอุปกรณ์โดยชื่อ
-  List<IoTDevice> searchDevices(String query) {
-    return devices
-        .where((device) => device.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+  IoTDevice? getDeviceByName(String name) {
+    return devices.firstWhere(
+      (device) => device.name == name,
+      orElse: () => IoTDevice(
+        keyID: -1,
+        name: 'ไม่พบอุปกรณ์',
+        price: 0.0,
+        date: DateTime.now(),
+      ),
+    );
   }
-
-  // กรองอุปกรณ์ตามราคา
-  List<IoTDevice> filterDevicesByPrice(double minPrice, double maxPrice) {
-    return devices
-        .where((device) => device.price >= minPrice && device.price <= maxPrice)
-        .toList();
-  }
-
-  // ฟังก์ชันการจัดการตะกร้าสินค้า
 
   // เพิ่มสินค้าลงตะกร้า
   void addToCart(IoTDevice device) {
@@ -127,4 +126,6 @@ Future<void> updateDevice(IoTDevice device) async {
     cart.clear();
     notifyListeners();
   }
+
+  void clearCart() {}
 }
