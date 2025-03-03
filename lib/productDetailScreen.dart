@@ -8,7 +8,7 @@ import 'editIoTDeviceScreen.dart';
 class ProductDetailScreen extends StatelessWidget {
   final IoTDevice device;
 
-  const ProductDetailScreen({Key? key, required this.device}) : super(key: key);
+  const ProductDetailScreen({super.key, required this.device});
 
   @override
   Widget build(BuildContext context) {
