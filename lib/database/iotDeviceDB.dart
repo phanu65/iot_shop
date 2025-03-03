@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:account/model/iotDevice.dart';
 
-
 class IoTDeviceDB {
   String dbName;
 
@@ -25,7 +24,10 @@ class IoTDeviceDB {
     Future<int> keyID = store.add(db, {
       'name': device.name,
       'price': device.price,
-      'date': device.date?.toIso8601String()
+      'quantity': device.quantity,
+      'category': device.category ?? '',
+      'imagePath': device.imagePath ?? '',
+      'date': device.date?.toIso8601String() ?? ''
     });
     db.close();
     return keyID;
@@ -39,10 +41,16 @@ class IoTDeviceDB {
     List<IoTDevice> devices = [];
     for (var record in snapshot) {
       IoTDevice device = IoTDevice(
-          keyID: record.key,
-          name: record['name'].toString(),
-          price: double.parse(record['price'].toString()),
-          date: DateTime.parse(record['date'].toString()));
+        keyID: record.key,
+        name: record['name'].toString(),
+        price: double.tryParse(record['price'].toString()) ?? 0.0,
+        quantity: int.tryParse(record['quantity'].toString()) ?? 1,
+        category: record['category']?.toString() ?? '',
+        imagePath: record['imagePath']?.toString() ?? '',
+        date: (record['date'] != null && record['date'].toString().isNotEmpty)
+            ? DateTime.tryParse(record['date'].toString())
+            : null,
+      );
       devices.add(device);
     }
     db.close();
@@ -60,13 +68,16 @@ class IoTDeviceDB {
     var db = await openDatabase();
     var store = intMapStoreFactory.store('iot_devices');
     store.update(
-        db,
-        {
-          'name': device.name,
-          'price': device.price,
-          'date': device.date?.toIso8601String()
-        },
-        finder: Finder(filter: Filter.equals(Field.key, device.keyID))
+      db,
+      {
+        'name': device.name,
+        'price': device.price,
+        'quantity': device.quantity,
+        'category': device.category ?? '',
+        'imagePath': device.imagePath ?? '',
+        'date': device.date?.toIso8601String() ?? ''
+      },
+      finder: Finder(filter: Filter.equals(Field.key, device.keyID)),
     );
     db.close();
   }
